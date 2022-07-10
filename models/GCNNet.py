@@ -101,9 +101,9 @@ class GCNNet(torch.nn.Module):
 
         # SMILES graph branch
         self.n_output = n_output
-        self.dconv1 = GCNConv(num_features_xd, num_features_xd, add_self_loops=True)
-        self.dconv2 = GCNConv(num_features_xd, num_features_xd*2, add_self_loops=True)
-        self.dconv3 = GCNConv(num_features_xd*2, num_features_xd*4, add_self_loops=True)
+        self.dconv1 = GCNConv(num_features_xd, num_features_xd, add_self_loops=False)
+        self.dconv2 = GCNConv(num_features_xd, num_features_xd*2, add_self_loops=False)
+        self.dconv3 = GCNConv(num_features_xd*2, num_features_xd*4, add_self_loops=False)
         self.fc_gd1 = torch.nn.Linear(num_features_xd*4, 1024)
         self.fc_gd2 = torch.nn.Linear(1024, output_dim)
         self.relu = nn.ReLU()
@@ -201,9 +201,9 @@ class GATNet(torch.nn.Module):
         self.dropout = nn.Dropout(dropout)
 
         # protein sequence branch (1d conv)
-        self.tconv1 = GATv2Conv(num_features_xt, latent_dim, add_self_loops=False, heads=heads, concat=False) #128
-        self.tconv2 = GATv2Conv(latent_dim, latent_dim*2, add_self_loops=False, heads=heads, concat=False) #256
-        self.tconv3 = GATv2Conv(latent_dim*2, latent_dim*4, add_self_loops=False, heads=heads, concat=False) #512
+        self.tconv1 = GCNConv(num_features_xt, latent_dim, add_self_loops=False) #1024
+        self.tconv2 = GCNConv(latent_dim, latent_dim*2, add_self_loops=False) #512
+        self.tconv3 = GCNConv(latent_dim*2, latent_dim*4, add_self_loops=False) #256
         self.fc_xt1 = nn.Linear(latent_dim*4, 1024)
         self.fc_xt2 = nn.Linear(1024, output_dim)
 
