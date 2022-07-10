@@ -1,0 +1,9 @@
+filename = '1Desm_esm5_FOLD0_280622'
+dataset = 'davis'
+BATCH_SIZE = 128
+NUM_EPOCHS = 1000
+max_lr = 0.01
+lr = 0.01
+FOLD = 0
+windows = 3
+RESUME_TRAIN = False
