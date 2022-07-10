@@ -214,7 +214,7 @@ if __name__=="__main__":
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('Train on: ', device, '\n')
 
-    train_data, valid_data, test_data = prepare_dataset_withFolds(dataset=config.dataset, path="../dataset/", fold=config.FOLD, windows=config.windows)
+    train_data, valid_data, test_data = prepare_dataset_withFolds(dataset=config.dataset, path="dataset/", fold=config.FOLD, windows=config.windows)
      
     #IF no fold, valid_data and test_data are the same split. This is just coding simplicity sake.
     #train_data, valid_data, test_data = prepare_dataset(dataset=config.dataset, windows=config.windows)
