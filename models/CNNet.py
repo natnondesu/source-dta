@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from torch_geometric.nn import GraphNorm ,GCNConv, global_mean_pool as gep, global_max_pool as gmp
-from source.layers import GraphConv
+from layers import GraphConv
 
 # GCN based model
 class CNNet(torch.nn.Module):

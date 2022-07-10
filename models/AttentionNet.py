@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from torch_geometric.nn import GraphNorm ,GCNConv, GATv2Conv, global_mean_pool as gep, global_max_pool as gmp
-from source.layers import GraphConv
+from layers import GraphConv
 ############################################ This part should be observe later ############################
 class CrossAttention(nn.Module):
     def __init__(self, dim, num_heads=8, qkv_bias=False, qk_scale=None, attn_drop=0., proj_drop=0.):

@@ -10,6 +10,10 @@ import torch
 import torch.optim as optim
 import matplotlib.pyplot as plt
 import config 
+import sys
+
+# Setting system path
+sys.path.append("../ResearchDTA")
 
 def GET_CONFIG():
     filename = config.filename
