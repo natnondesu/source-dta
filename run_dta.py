@@ -9,12 +9,12 @@ from models.SelfAtt import SelfAttentionNet
 import torch
 import torch.optim as optim
 import matplotlib.pyplot as plt
-import config 
 import sys
 
 # Setting system path
-sys.path.append("../ResearchDTA")
+sys.path.append("../")
 
+import config 
 def GET_CONFIG():
     filename = config.filename
     dataset = config.dataset
