@@ -1,6 +1,6 @@
 import torch
 import os
-from source.emetrics import *
+from emetrics import *
 from torch_geometric.data import Batch
 import time
 

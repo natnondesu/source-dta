@@ -7,7 +7,7 @@ import json, pickle
 from rdkit import Chem
 from rdkit.Chem import MolFromSmiles
 from tqdm import tqdm
-from source.CreateDataset_graph import CreateDataset    
+from CreateDataset_graph import CreateDataset    
 import networkx as nx   
 import torch
 import torchdrug as td
