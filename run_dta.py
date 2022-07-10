@@ -6,6 +6,7 @@ from models.CNNet import CNNet, CustomCNNet
 from models.GCNNet import GCNNet, CustomGCNNet, GATNet
 from models.AttentionNet import AttentionNet
 from models.SelfAtt import SelfAttentionNet
+from models.TransformerNet import TransNet
 import torch
 import torch.optim as optim
 import matplotlib.pyplot as plt
@@ -34,10 +35,10 @@ def GET_CONFIG():
 
 
 def GET_MODEL():
-    #model = SelfAttentionNet(num_features_xd=78, num_features_xt=1280, dropout=0.1)
-    #model_st = SelfAttentionNet.__name__
-    model = GCNNet(num_features_xd=78, num_features_xt=1280, dropout=0)
-    model_st = GCNNet.__name__
+    model = TransNet(num_features_xd=78, num_features_xt=1280, dropout=0)
+    model_st = TransNet.__name__
+    #model = GCNNet(num_features_xd=78, num_features_xt=1280, dropout=0)
+    #model_st = GCNNet.__name__
     return model, model_st
 
 
