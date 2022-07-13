@@ -42,6 +42,15 @@ def Edge_Feature(mol):
     combine = np.concatenate((e_feat, e_hot), axis=1)
     return combine
 
+def add_self_loop(node_list, edge_list):
+    self_edge_index = []
+    self_loop = np.matrix(np.eye(node_list.shape[0]))
+    index_row, index_col = np.where(self_loop >= 0.5)
+    for i, j in zip(index_row, index_col):
+        self_edge_index.append([i, j])
+    edge_list = np.append(edge_list, self_edge_index, axis=0)
+    return edge_list
+
 def Adj_list(mol):
     # mol(Object) : predicted molecule features from SMILEs
     # return only adjacency list from molecule object (from, to)
@@ -56,7 +65,7 @@ def Combine_feature(smile):
     # Combine all feature into single list.
     x = np.array(Node_Feature(smile))
     y = np.array(Edge_Feature(smile))
-    z = np.array(Adj_list(smile))
+    z = np.array(add_self_loop(x, Adj_list(smile)))
     t = np.array(Edge_type(smile))
     return [x, y, z, t]
 
@@ -120,17 +129,17 @@ def Make_feature(path="/", split='train', dataset='kiba', debug=False):
 
     if debug==True:
         for smile in smile_list:
-            #mol = td.data.Molecule.from_smiles(smile)
-            #feature = Combine_feature(mol)
-            feature = smile_to_graph(smile)
+            mol = td.data.Molecule.from_smiles(smile)
+            feature = Combine_feature(mol)
+            #feature = smile_to_graph(smile)
             smile_graph[smile] = feature  
         return smile_graph
 
     for smile in smile_list:
         try:
-            #mol = td.data.Molecule.from_smiles(smile)
-            #feature = Combine_feature(mol)
-            feature = smile_to_graph(smile)
+            mol = td.data.Molecule.from_smiles(smile)
+            feature = Combine_feature(mol)
+            #feature = smile_to_graph(smile)
             smile_graph[smile] = feature
         except:
             # Raise from "Invalid: SMILE"
