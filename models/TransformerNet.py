@@ -8,9 +8,9 @@ class TransNet(torch.nn.Module):
 
         # SMILES graph branch
         self.n_output = n_output
-        self.dconv1 = TransformerConv(num_features_xd, num_features_xd, heads=2, concat=False)
-        self.dconv2 = TransformerConv(num_features_xd, num_features_xd*2, heads=2, concat=False)
-        self.dconv3 = TransformerConv(num_features_xd*2, num_features_xd*4, heads=2, concat=False)
+        self.dconv1 = TransformerConv(num_features_xd, num_features_xd, heads=2, concat=False, dropout=0.2)
+        self.dconv2 = TransformerConv(num_features_xd, num_features_xd*2, heads=2, concat=False, dropout=0.2)
+        self.dconv3 = TransformerConv(num_features_xd*2, num_features_xd*4, heads=2, concat=False, dropout=0.2)
         self.fc_gd1 = torch.nn.Linear(num_features_xd*4, 1024)
         self.fc_gd2 = torch.nn.Linear(1024, output_dim)
         self.relu = nn.ReLU()
