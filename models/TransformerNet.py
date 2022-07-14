@@ -3,14 +3,14 @@ import torch.nn as nn
 from torch_geometric.nn import GraphNorm ,GCNConv, TransformerConv, global_mean_pool as gep, global_max_pool as gmp
 
 class TransNet(torch.nn.Module):
-    def __init__(self, n_output=1, num_features_xd=69, num_features_xt=33, latent_dim=128, output_dim=128, dropout=0.2):
+    def __init__(self, n_output=1, num_features_xd=69, num_features_xt=33, latent_dim=128, output_dim=128, dropout=0.2, edge_input_dim=None):
         super(TransNet, self).__init__()
 
         # SMILES graph branch
         self.n_output = n_output
-        self.dconv1 = TransformerConv(num_features_xd, num_features_xd, heads=2, concat=False, dropout=0.2)
-        self.dconv2 = TransformerConv(num_features_xd, num_features_xd*2, heads=2, concat=False, dropout=0.2)
-        self.dconv3 = TransformerConv(num_features_xd*2, num_features_xd*4, heads=2, concat=False, dropout=0.2)
+        self.dconv1 = TransformerConv(num_features_xd, num_features_xd, edge_dim=edge_input_dim, heads=2, concat=False, dropout=0)
+        self.dconv2 = TransformerConv(num_features_xd, num_features_xd*2, edge_dim=edge_input_dim ,heads=2, concat=False, dropout=0)
+        self.dconv3 = TransformerConv(num_features_xd*2, num_features_xd*4, edge_dim=edge_input_dim, heads=2, concat=False, dropout=0)
         self.fc_gd1 = torch.nn.Linear(num_features_xd*4, 1024)
         self.fc_gd2 = torch.nn.Linear(1024, output_dim)
         self.relu = nn.ReLU()
@@ -46,13 +46,13 @@ class TransNet(torch.nn.Module):
         # get protein input
         target_x, target_edge_index, target_batch = data_prot.x, data_prot.edge_index, data_prot.batch
 
-        x = self.dconv1(x, edge_index)
+        x = self.dconv1(x, edge_index, edge_attr)
         x = self.relu(self.DGnorm1(x))
 
-        x = self.dconv2(x, edge_index)
+        x = self.dconv2(x, edge_index, edge_attr)
         x = self.relu(self.DGnorm2(x))
 
-        x = self.dconv3(x, edge_index)
+        x = self.dconv3(x, edge_index, edge_attr)
         x = self.relu(self.DGnorm3(x))
         x = gep(x, batch) # global mean pooling
 

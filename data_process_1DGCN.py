@@ -42,14 +42,19 @@ def Edge_Feature(mol):
     combine = np.concatenate((e_feat, e_hot), axis=1)
     return combine
 
-def add_self_loop(node_list, edge_list):
+def add_self_loop(node_list, edge_list, edge_attr):
     self_edge_index = []
+    self_edge_attr = []
+    edge_attr_dim = edge_attr.shape[1]
     self_loop = np.matrix(np.eye(node_list.shape[0]))
     index_row, index_col = np.where(self_loop >= 0.5)
     for i, j in zip(index_row, index_col):
         self_edge_index.append([i, j])
-    edge_list = np.append(edge_list, self_edge_index, axis=0)
-    return edge_list
+        if edge_attr is not None:
+            self_edge_attr.extend(np.ones([1, edge_attr_dim], int).tolist())
+    edge_list = np.append(edge_list, self_edge_index, axis=0)   
+    edge_attr = np.append(edge_attr, self_edge_attr, axis=0)
+    return edge_list, edge_attr
 
 def Adj_list(mol):
     # mol(Object) : predicted molecule features from SMILEs
@@ -65,10 +70,10 @@ def Combine_feature(smile):
     # Combine all feature into single list.
     x = np.array(Node_Feature(smile))
     y = np.array(Edge_Feature(smile))
-    z = np.array(add_self_loop(x, Adj_list(smile)))
-    t = np.array(Edge_type(smile))
-    return [x, y, z, t]
-
+    z, y = add_self_loop(x, Adj_list(smile), y)
+    #t = np.array(Edge_type(smile)) For RGCN
+    return [x, y, z, [0]]
+    
 # mol atom feature for mol graph
 def atom_features(atom):
     # 44 +11 +11 +11 +1
