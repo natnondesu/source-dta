@@ -8,12 +8,12 @@ class TransNet(torch.nn.Module):
 
         # SMILES graph branch
         self.n_output = n_output
-        self.dconv1 = TransformerConv(num_features_xd, num_features_xd, edge_dim=edge_input_dim, heads=2, concat=False, dropout=0)
-        self.dconv2 = TransformerConv(num_features_xd, num_features_xd*2, edge_dim=edge_input_dim ,heads=2, concat=False, dropout=0)
-        self.dconv3 = TransformerConv(num_features_xd*2, num_features_xd*4, edge_dim=edge_input_dim, heads=2, concat=False, dropout=0)
+        self.dconv1 = TransformerConv(num_features_xd, num_features_xd, edge_dim=edge_input_dim, heads=1, concat=True, dropout=0)
+        self.dconv2 = TransformerConv(num_features_xd, num_features_xd, edge_dim=edge_input_dim ,heads=2, concat=True, dropout=0.1)
+        self.dconv3 = TransformerConv(num_features_xd*2, num_features_xd*2, edge_dim=edge_input_dim, heads=2, concat=True, dropout=0.1)
         self.fc_gd1 = torch.nn.Linear(num_features_xd*4, 1024)
         self.fc_gd2 = torch.nn.Linear(1024, output_dim)
-        self.relu = nn.ReLU()
+        self.relu = nn.LeakyReLU()
         self.dropout = nn.Dropout(dropout)
 
         # protein sequence branch (1d conv)
