@@ -10,9 +10,9 @@ class GATNet(torch.nn.Module):
 
         # SMILES graph branch
         self.n_output = n_output
-        self.dconv1 = GATv2Conv(num_features_xd, num_features_xd, edge_dim=edge_input_dim, heads=2, concat=True, dropout=0)
-        self.dconv2 = GATv2Conv(num_features_xd*2, num_features_xd*2, add_self_loops=True, heads=2, concat=True, dropout=0)
-        self.dconv3 = GATv2Conv(num_features_xd*4, num_features_xd*4, add_self_loops=True, heads=2, concat=True, dropout=0)
+        self.dconv1 = GATv2Conv(num_features_xd, num_features_xd, edge_dim=edge_input_dim, heads=2, concat=True, dropout=0, add_self_loops=False)
+        self.dconv2 = GATv2Conv(num_features_xd*2, num_features_xd*2, edge_dim=edge_input_dim, heads=2, concat=True, dropout=0, add_self_loops=False)
+        self.dconv3 = GATv2Conv(num_features_xd*4, num_features_xd*4, edge_dim=edge_input_dim, heads=2, concat=True, dropout=0, add_self_loops=False)
         self.fc_gd1 = torch.nn.Linear(num_features_xd*8, 1024)
         self.fc_gd2 = torch.nn.Linear(1024, output_dim)
         self.relu = nn.LeakyReLU()
@@ -31,7 +31,7 @@ class GATNet(torch.nn.Module):
         self.out = nn.Linear(512, self.n_output)
 
         # Norm layers
-        self.DGnorm1 = GraphNorm(num_features_xd)
+        self.DGnorm1 = GraphNorm(num_features_xd*2)
         self.DGnorm2 = GraphNorm(num_features_xd*4)
         self.DGnorm3 = GraphNorm(num_features_xd*8)
         self.TGnorm1 = GraphNorm(latent_dim)
