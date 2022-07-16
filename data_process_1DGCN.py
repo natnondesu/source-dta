@@ -306,7 +306,7 @@ def prepare_dataset(dataset, path='dataset/', windows=3):
     return train_data, test_data, test_data
 
 # Add validation set
-def prepare_dataset_withFolds(dataset, path='dataset/', fold=0, windows=3):
+def prepare_dataset_withFolds(dataset, path='dataset/', fold=0, windows=3, final_eval=False):
     assert(type(dataset) == str), "InputFailed: datasets should be string."
 
     print('Convert data for ', dataset)
@@ -425,5 +425,8 @@ def prepare_dataset_withFolds(dataset, path='dataset/', fold=0, windows=3):
                             protein_graph=prot_graph_test
                             )
     print('\nPytorch dataset have been created  \( ﾟヮﾟ)/ HooRay!!')   
+    
+    if final_eval == True:
+        return train_data, test_data, test_data   
 
     return train_data, valid_data, test_data   

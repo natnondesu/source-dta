@@ -2,10 +2,8 @@ from torch_geometric.loader import DataLoader
 from data_process_1DGCN import prepare_dataset_withFolds, prepare_dataset
 from utils import *
 from emetrics import *
-from models.CNNet import CNNet, CustomCNNet
-from models.GCNNet import GCNNet, CustomGCNNet, GATNet
-from models.AttentionNet import AttentionNet
-from models.SelfAtt import SelfAttentionNet
+from models.GCNNet import GCNNet, CustomGCNNet
+from models.GATNet import GATNet
 from models.TransformerNet import TransNet
 import torch
 import torch.optim as optim
@@ -35,8 +33,10 @@ def GET_CONFIG():
 
 
 def GET_MODEL():
-    model = TransNet(num_features_xd=66, num_features_xt=1280, dropout=0, edge_input_dim=22)
-    model_st = TransNet.__name__
+    #model = TransNet(num_features_xd=66, num_features_xt=1280, dropout=0, edge_input_dim=22)
+    #model_st = TransNet.__name__
+    model = GATNet(num_features_xd=66, num_features_xt=1280, dropout=0, edge_input_dim=22)
+    model_st = GATNet.__name__
     #model = GCNNet(num_features_xd=78, num_features_xt=1280, dropout=0)
     #model_st = GCNNet.__name__
     return model, model_st
@@ -143,7 +143,7 @@ def RUN_DTA(train_data, valid_data, device):
         valid_loss_list.append(np.around(metric[0], decimals=4))
         train_ci_list.append(np.around(train_ci, decimals=4))
         valid_ci_list.append(np.around(metric[1], decimals=4))
-        LR = LR_scheduler_with_warmup(optimizer, LR, epoch, warmup_epoch=50, scale=0.7, set_LR=MAX_LR, interval_epoch=200)
+        LR = LR_scheduler_with_warmup(optimizer, LR, epoch, warmup_epoch=50, scale=0.7, set_LR=MAX_LR, interval_epoch=100)
 
         with open(result_train_name, 'a') as f:
             f.write("On epoch: "+ str(epoch+1) + ", LR : " + str(LR) + " ---> " + "Loss: " + str(train_loss) + " Trainning ci = " + str(train_ci) + '\n')
@@ -215,7 +215,7 @@ if __name__=="__main__":
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('Train on: ', device, '\n')
 
-    train_data, valid_data, test_data = prepare_dataset_withFolds(dataset=config.dataset, path="dataset/", fold=config.FOLD, windows=config.windows)
+    train_data, valid_data, test_data = prepare_dataset_withFolds(dataset=config.dataset, path="dataset/", fold=config.FOLD, windows=config.windows, final_eval=False)
      
     #IF no fold, valid_data and test_data are the same split. This is just coding simplicity sake.
     #train_data, valid_data, test_data = prepare_dataset(dataset=config.dataset, windows=config.windows)
