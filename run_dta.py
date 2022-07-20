@@ -33,10 +33,10 @@ def GET_CONFIG():
 
 
 def GET_MODEL():
-    #model = TransNet(num_features_xd=66, num_features_xt=1280, dropout=0, edge_input_dim=22)
-    #model_st = TransNet.__name__
-    model = GATNet(num_features_xd=66, num_features_xt=1280, dropout=0, edge_input_dim=22)
-    model_st = GATNet.__name__
+    model = TransNet(num_features_xd=66, num_features_xt=1280, dropout=0.1, edge_input_dim=22)
+    model_st = TransNet.__name__
+    #model = GATNet(num_features_xd=66, num_features_xt=1280, dropout=0, edge_input_dim=22)
+    #model_st = GATNet.__name__
     #model = GCNNet(num_features_xd=78, num_features_xt=1280, dropout=0)
     #model_st = GCNNet.__name__
     return model, model_st
@@ -117,12 +117,13 @@ def RUN_DTA(train_data, valid_data, device):
     model, model_st = GET_MODEL()
     model = model.to(device)
 
-    optimizer = optim.AdamW(model.parameters(), lr=LR)
+    optimizer = optim.AdamW(model.parameters(), lr=LR, weight_decay=5e-2)
     criterion = torch.nn.MSELoss()
 
     train_loader, valid_loader, _ = LOAD_DATA(train=train_data, valid=valid_data, test=None, batch_size=BATCH_SIZE)
 
     best_mse = 1000
+    best_ci = 0
     best_epoch = -1
     start_epoch = 0
 
@@ -143,19 +144,26 @@ def RUN_DTA(train_data, valid_data, device):
         valid_loss_list.append(np.around(metric[0], decimals=4))
         train_ci_list.append(np.around(train_ci, decimals=4))
         valid_ci_list.append(np.around(metric[1], decimals=4))
-        LR = LR_scheduler_with_warmup(optimizer, LR, epoch, warmup_epoch=50, scale=0.7, set_LR=MAX_LR, interval_epoch=100)
+        LR = LR_scheduler_with_warmup(optimizer, LR, epoch, warmup_epoch=50, scale=0.8, set_LR=MAX_LR, interval_epoch=100)
 
         with open(result_train_name, 'a') as f:
             f.write("On epoch: "+ str(epoch+1) + ", LR : " + str(LR) + " ---> " + "Loss: " + str(train_loss) + " Trainning ci = " + str(train_ci) + '\n')
 
         with open(result_eval_name, 'a') as f:
             f.write("On epoch" + str(epoch+1) + ", Validation mse --> " + str(metric[0]) + ", Validation ci --> " + str(metric[1]) + '\n')
+      
+        # If select model by ci score.
+        if metric[1] > best_ci:
+            best_ci = metric[1]
+            best_epoch = epoch+1
+            print("On epoch", best_epoch, ", Validation error decrease to --> ", str(metric[0]), ", CI score --> ", str(best_ci), " Select by ci")
+            torch.save(model.state_dict(), model_file_name + '.model') # Save best perform on validation set
 
-        if metric[0] < best_mse:
+        """if metric[0] < best_mse:
             best_mse = metric[0]
             best_epoch = epoch+1
             print("On epoch", best_epoch, ", Validation error decrease to --> ", best_mse, ", CI score --> ", str(metric[1]))
-            torch.save(model.state_dict(), model_file_name + '.model') # Save best perform on validation set
+            torch.save(model.state_dict(), model_file_name + '.model') # Save best perform on validation set"""
 
     history = {"train_loss": train_loss_list, "train_ci":train_ci_list, "valid_loss":valid_loss_list, "valid_ci":valid_ci_list}
     PLOT_LOSS(history=history, fignames=figure_file_name, start_epoch=3)

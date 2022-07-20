@@ -9,8 +9,8 @@ class TransNet(torch.nn.Module):
         # SMILES graph branch
         self.n_output = n_output
         self.dconv1 = TransformerConv(num_features_xd, num_features_xd, edge_dim=edge_input_dim, heads=1, concat=True, dropout=0)
-        self.dconv2 = TransformerConv(num_features_xd, num_features_xd, edge_dim=edge_input_dim ,heads=2, concat=True, dropout=0.1)
-        self.dconv3 = TransformerConv(num_features_xd*2, num_features_xd*2, edge_dim=edge_input_dim, heads=2, concat=True, dropout=0.1)
+        self.dconv2 = TransformerConv(num_features_xd, num_features_xd, edge_dim=edge_input_dim ,heads=2, concat=True, dropout=0)
+        self.dconv3 = TransformerConv(num_features_xd*2, num_features_xd*2, edge_dim=edge_input_dim, heads=2, concat=True, dropout=0)
         self.fc_gd1 = torch.nn.Linear(num_features_xd*4, 1024)
         self.fc_gd2 = torch.nn.Linear(1024, output_dim)
         self.relu = nn.LeakyReLU()
@@ -59,9 +59,9 @@ class TransNet(torch.nn.Module):
         # flatten
         x = self.batchnorm1(self.fc_gd1(x))
         x = self.relu(x)
-        x = self.dropout(x)
+        #x = self.dropout(x)
         x = self.fc_gd2(x)
-        x = self.dropout(x)
+        #x = self.dropout(x)
 
         # target protein
         xt = self.tconv1(target_x, target_edge_index)
@@ -77,9 +77,9 @@ class TransNet(torch.nn.Module):
         # flatten
         xt = self.batchnorm2(self.fc_xt1(xt))
         xt = self.relu(xt)
-        xt = self.dropout(xt)
+        #xt = self.dropout(xt)
         xt = self.fc_xt2(xt)
-        xt = self.dropout(xt)
+        #xt = self.dropout(xt)
 
         # concat
         xc = torch.cat((x, xt), 1)
@@ -89,6 +89,6 @@ class TransNet(torch.nn.Module):
         xc = self.dropout(xc)
         xc = self.batchnorm4(self.fc2(xc))
         xc = self.relu(xc)
-        #xc = self.dropout(xc)
+        xc = self.dropout(xc)
         out = self.out(xc)
         return out
