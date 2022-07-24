@@ -2,7 +2,7 @@ from torch_geometric.loader import DataLoader
 from data_process_1DGCN import prepare_dataset_withFolds, prepare_dataset
 from utils import *
 from emetrics import *
-from models.GCNNet import GCNNet, CustomGCNNet
+from models.GCNNet import GCNNet, GCNEdgeNet
 from models.GATNet import GATNet
 from models.TransformerNet import TransNet
 import torch
@@ -33,10 +33,17 @@ def GET_CONFIG():
 
 
 def GET_MODEL():
+<<<<<<< HEAD
     model = TransNet(num_features_xd=66, num_features_xt=1280, dropout=0, edge_input_dim=22)
     model_st = TransNet.__name__
     #model = GATNet(num_features_xd=66, num_features_xt=1280, dropout=0, edge_input_dim=22)
     #model_st = GATNet.__name__
+=======
+    #model = TransNet(num_features_xd=66, num_features_xt=1280, dropout=0.1, edge_input_dim=22)
+    #model_st = TransNet.__name__
+    model = GCNEdgeNet(num_features_xd=66, num_features_xt=1280, dropout=0, edge_input_dim=22)
+    model_st = GCNEdgeNet.__name__
+>>>>>>> 657d7f3018069d777032c3b63633a58e5a76f2b8
     #model = GCNNet(num_features_xd=78, num_features_xt=1280, dropout=0)
     #model_st = GCNNet.__name__
     return model, model_st
@@ -117,7 +124,11 @@ def RUN_DTA(train_data, valid_data, device):
     model, model_st = GET_MODEL()
     model = model.to(device)
 
+<<<<<<< HEAD
     optimizer = optim.AdamW(model.parameters(), lr=LR, weight_decay=0.01)
+=======
+    optimizer = optim.AdamW(model.parameters(), lr=LR, weight_decay=2e-2)
+>>>>>>> 657d7f3018069d777032c3b63633a58e5a76f2b8
     criterion = torch.nn.MSELoss()
 
     train_loader, valid_loader, _ = LOAD_DATA(train=train_data, valid=valid_data, test=None, batch_size=BATCH_SIZE)
