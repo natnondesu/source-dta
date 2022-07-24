@@ -1,27 +1,27 @@
 import torch
 import torch.nn as nn
 from torch_geometric.nn import GraphNorm ,GCNConv, GATv2Conv, global_mean_pool as gep, global_max_pool as gmp
-from layers import GraphConv
+from import_layers import GCNEdgeConv
 
 # Double GCN based model
-class CustomGCNNet(torch.nn.Module):
+class GCNEdgeNet(torch.nn.Module):
     def __init__(self, n_output=1, num_features_xd=69, num_features_xt=33, latent_dim=128, output_dim=128, dropout=0.2, edge_input_dim=None):
-        super(CustomGCNNet, self).__init__()
+        super(GCNEdgeNet, self).__init__()
 
         # SMILES graph branch
         self.n_output = n_output
-        self.dconv1 = GraphConv(num_features_xd, num_features_xd, edge_input_dim=edge_input_dim, add_self_loop=True)
-        self.dconv2 = GraphConv(num_features_xd, num_features_xd*2, edge_input_dim=edge_input_dim, add_self_loop=True)
-        self.dconv3 = GraphConv(num_features_xd*2, num_features_xd * 4, edge_input_dim=edge_input_dim, add_self_loop=True)
+        self.dconv1 = GCNEdgeConv(num_features_xd, num_features_xd, edge_input_dim=edge_input_dim, add_self_loop=False)
+        self.dconv2 = GCNEdgeConv(num_features_xd, num_features_xd*2, edge_input_dim=edge_input_dim, add_self_loop=False)
+        self.dconv3 = GCNEdgeConv(num_features_xd*2, num_features_xd * 4, edge_input_dim=edge_input_dim, add_self_loop=False)
         self.fc_gd1 = torch.nn.Linear(num_features_xd*4, 1024)
         self.fc_gd2 = torch.nn.Linear(1024, output_dim)
         self.relu = nn.ReLU()
         self.dropout = nn.Dropout(dropout)
 
         # protein sequence branch (1d conv)
-        self.tconv1 = GraphConv(num_features_xt, latent_dim, edge_input_dim=None, add_self_loop=False) #1024
-        self.tconv2 = GraphConv(latent_dim, latent_dim*2, edge_input_dim=None, add_self_loop=False) #512
-        self.tconv3 = GraphConv(latent_dim*2, latent_dim*4, edge_input_dim=None, add_self_loop=False) #256
+        self.tconv1 = GCNConv(num_features_xt, latent_dim, add_self_loop=False) #1024
+        self.tconv2 = GCNConv(latent_dim, latent_dim*2, add_self_loop=False) #512
+        self.tconv3 = GCNConv(latent_dim*2, latent_dim*4, add_self_loop=False) #256
         self.fc_xt1 = nn.Linear(latent_dim*4, 1024)
         self.fc_xt2 = nn.Linear(1024, output_dim)
 
@@ -66,13 +66,13 @@ class CustomGCNNet(torch.nn.Module):
         x = self.dropout(x)
 
         # target protein
-        xt = self.tconv1(target_x, target_edge_index, None)
+        xt = self.tconv1(target_x, target_edge_index)
         xt = self.relu(self.TGnorm1(xt))
 
-        xt = self.tconv2(xt, target_edge_index, None)
+        xt = self.tconv2(xt, target_edge_index)
         xt = self.relu(self.TGnorm2(xt))
 
-        xt = self.tconv3(xt, target_edge_index, None)
+        xt = self.tconv3(xt, target_edge_index)
         xt = self.relu(self.TGnorm3(xt))
         xt = gep(xt, target_batch) # global mean pooling
 
