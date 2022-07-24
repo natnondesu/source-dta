@@ -10,18 +10,18 @@ class GCNEdgeNet(torch.nn.Module):
 
         # SMILES graph branch
         self.n_output = n_output
-        self.dconv1 = GCNEdgeConv(num_features_xd, num_features_xd, edge_input_dim=edge_input_dim, add_self_loop=False)
-        self.dconv2 = GCNEdgeConv(num_features_xd, num_features_xd*2, edge_input_dim=edge_input_dim, add_self_loop=False)
-        self.dconv3 = GCNEdgeConv(num_features_xd*2, num_features_xd * 4, edge_input_dim=edge_input_dim, add_self_loop=False)
+        self.dconv1 = GCNEdgeConv(num_features_xd, num_features_xd, edge_input_dim=edge_input_dim, add_self_loops=False)
+        self.dconv2 = GCNEdgeConv(num_features_xd, num_features_xd*2, edge_input_dim=edge_input_dim, add_self_loops=False)
+        self.dconv3 = GCNEdgeConv(num_features_xd*2, num_features_xd * 4, edge_input_dim=edge_input_dim, add_self_loops=False)
         self.fc_gd1 = torch.nn.Linear(num_features_xd*4, 1024)
         self.fc_gd2 = torch.nn.Linear(1024, output_dim)
         self.relu = nn.ReLU()
         self.dropout = nn.Dropout(dropout)
 
         # protein sequence branch (1d conv)
-        self.tconv1 = GCNConv(num_features_xt, latent_dim, add_self_loop=False) #1024
-        self.tconv2 = GCNConv(latent_dim, latent_dim*2, add_self_loop=False) #512
-        self.tconv3 = GCNConv(latent_dim*2, latent_dim*4, add_self_loop=False) #256
+        self.tconv1 = GCNConv(num_features_xt, latent_dim, add_self_loops=False) #1024
+        self.tconv2 = GCNConv(latent_dim, latent_dim*2, add_self_loops=False) #512
+        self.tconv3 = GCNConv(latent_dim*2, latent_dim*4, add_self_loops=False) #256
         self.fc_xt1 = nn.Linear(latent_dim*4, 1024)
         self.fc_xt2 = nn.Linear(1024, output_dim)
 
