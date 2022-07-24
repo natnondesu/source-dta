@@ -33,7 +33,7 @@ def GET_CONFIG():
 
 
 def GET_MODEL():
-    model = TransNet(num_features_xd=66, num_features_xt=1280, dropout=0.1, edge_input_dim=22)
+    model = TransNet(num_features_xd=66, num_features_xt=1280, dropout=0, edge_input_dim=22)
     model_st = TransNet.__name__
     #model = GATNet(num_features_xd=66, num_features_xt=1280, dropout=0, edge_input_dim=22)
     #model_st = GATNet.__name__
@@ -117,7 +117,7 @@ def RUN_DTA(train_data, valid_data, device):
     model, model_st = GET_MODEL()
     model = model.to(device)
 
-    optimizer = optim.AdamW(model.parameters(), lr=LR, weight_decay=5e-2)
+    optimizer = optim.AdamW(model.parameters(), lr=LR, weight_decay=0.01)
     criterion = torch.nn.MSELoss()
 
     train_loader, valid_loader, _ = LOAD_DATA(train=train_data, valid=valid_data, test=None, batch_size=BATCH_SIZE)
@@ -153,17 +153,17 @@ def RUN_DTA(train_data, valid_data, device):
             f.write("On epoch" + str(epoch+1) + ", Validation mse --> " + str(metric[0]) + ", Validation ci --> " + str(metric[1]) + '\n')
       
         # If select model by ci score.
-        if metric[1] > best_ci:
+        """if metric[1] > best_ci:
             best_ci = metric[1]
             best_epoch = epoch+1
             print("On epoch", best_epoch, ", Validation error decrease to --> ", str(metric[0]), ", CI score --> ", str(best_ci), " Select by ci")
-            torch.save(model.state_dict(), model_file_name + '.model') # Save best perform on validation set
+            torch.save(model.state_dict(), model_file_name + '.model') # Save best perform on validation set"""
 
-        """if metric[0] < best_mse:
+        if metric[0] < best_mse:
             best_mse = metric[0]
             best_epoch = epoch+1
             print("On epoch", best_epoch, ", Validation error decrease to --> ", best_mse, ", CI score --> ", str(metric[1]))
-            torch.save(model.state_dict(), model_file_name + '.model') # Save best perform on validation set"""
+            torch.save(model.state_dict(), model_file_name + '.model') # Save best perform on validation set
 
     history = {"train_loss": train_loss_list, "train_ci":train_ci_list, "valid_loss":valid_loss_list, "valid_ci":valid_ci_list}
     PLOT_LOSS(history=history, fignames=figure_file_name, start_epoch=3)
@@ -183,6 +183,11 @@ def RUN_DTA(train_data, valid_data, device):
 
 
 def EVAL_TEST(test_data, model_list, device):
+    """
+        This function evaluate model that train on 4-fold training set & selected by validation set.
+        [train][train][train][train][validation] --> (model state dict)
+        then make an evaluation on hold out test set (independence test set) by using above learned model.
+    """
     model, _ = GET_MODEL()
     model = model.to(device)
     model_file_name, _, _, result_eval_name, _ = SAVE_LOCATION(fname=config.filename)
@@ -223,7 +228,7 @@ if __name__=="__main__":
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('Train on: ', device, '\n')
 
-    train_data, valid_data, test_data = prepare_dataset_withFolds(dataset=config.dataset, path="dataset/", fold=config.FOLD, windows=config.windows, final_eval=False)
+    train_data, valid_data, test_data = prepare_dataset_withFolds(dataset=config.dataset, path="dataset/", fold=config.FOLD, windows=config.windows, final_eval=False) # Final eval = True --> using test set as validation set
      
     #IF no fold, valid_data and test_data are the same split. This is just coding simplicity sake.
     #train_data, valid_data, test_data = prepare_dataset(dataset=config.dataset, windows=config.windows)
