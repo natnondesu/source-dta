@@ -130,7 +130,7 @@ class GCNEdgeConv(MessagePassing):
                           weight_initializer='glorot')
 
         if edge_input_dim:
-            self.edge_linear = Linear(edge_input_dim, in_channels, weight_initializer='glorot')
+            self.edge_linear = Linear(edge_input_dim, out_channels, weight_initializer='glorot', bias=False)
         else:
             self.edge_linear = None
 

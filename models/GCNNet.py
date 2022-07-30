@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from torch_geometric.nn import GraphNorm ,GCNConv, GATv2Conv, global_mean_pool as gep, global_max_pool as gmp
 from import_layers import GCNEdgeConv
+from layers import GraphConv
 
 # Double GCN based model
 class GCNEdgeNet(torch.nn.Module):
@@ -10,9 +11,9 @@ class GCNEdgeNet(torch.nn.Module):
 
         # SMILES graph branch
         self.n_output = n_output
-        self.dconv1 = GCNEdgeConv(num_features_xd, num_features_xd, edge_input_dim=edge_input_dim, add_self_loops=False)
-        self.dconv2 = GCNEdgeConv(num_features_xd, num_features_xd*2, edge_input_dim=edge_input_dim, add_self_loops=False)
-        self.dconv3 = GCNEdgeConv(num_features_xd*2, num_features_xd * 4, edge_input_dim=edge_input_dim, add_self_loops=False)
+        self.dconv1 = GraphConv(num_features_xd, num_features_xd, edge_input_dim=edge_input_dim, add_self_loops=False)
+        self.dconv2 = GraphConv(num_features_xd, num_features_xd*2, edge_input_dim=edge_input_dim, add_self_loops=False)
+        self.dconv3 = GraphConv(num_features_xd*2, num_features_xd * 4, edge_input_dim=edge_input_dim, add_self_loops=False)
         self.fc_gd1 = torch.nn.Linear(num_features_xd*4, 1024)
         self.fc_gd2 = torch.nn.Linear(1024, output_dim)
         self.relu = nn.ReLU()

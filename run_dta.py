@@ -117,7 +117,7 @@ def RUN_DTA(train_data, valid_data, device):
     model, model_st = GET_MODEL()
     model = model.to(device)
 
-    optimizer = optim.AdamW(model.parameters(), lr=LR, weight_decay=0.05)
+    optimizer = optim.AdamW(model.parameters(), lr=LR, weight_decay=0.01)
     criterion = torch.nn.MSELoss()
 
     train_loader, valid_loader, _ = LOAD_DATA(train=train_data, valid=valid_data, test=None, batch_size=BATCH_SIZE)
