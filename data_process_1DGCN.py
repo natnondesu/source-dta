@@ -198,11 +198,12 @@ def prot_to_graph(path="/", split='full', dataset='kiba', windows=5):
     for key in prot_key:
         emb = torch.load(path+'esm_emb/'+key+'.pt')
         target_feature = emb["representations"].squeeze()
+        target_global_feature = emb["sequence_repr"]
         #target_feature = emb.squeeze()
         target_size = len(target_feature)
         target_edge_index = create_graph(target_size, windows)
 
-        prot_graph[key] = [target_size, target_feature, target_edge_index]
+        prot_graph[key] = [target_size, target_feature, target_edge_index, target_global_feature]
     print("Protein graph construction -> Complete  \( ﾟヮﾟ)/\n\n")
     return prot_graph
 

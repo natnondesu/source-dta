@@ -9,14 +9,14 @@ from torch_geometric.utils import add_self_loops, degree
 ######################################################################################################################       
 
 class GraphConv(MessagePassing):
-    def __init__(self, input_dim, output_dim, edge_input_dim=None, batch_norm=False, add_self_loops=True, bias=True):
+    def __init__(self, input_dim, output_dim, edge_input_dim=None, batchnorm=False, add_self_loops=True, bias=True):
         super(GraphConv, self).__init__(aggr='add')
         self.input_dim = input_dim
         self.output_dim = output_dim
         self.edge_input_dim = edge_input_dim
         self.add_self_loops = add_self_loops
         
-        if batch_norm:
+        if batchnorm:
             self.batch_norm = nn.BatchNorm1d(output_dim)
         else:
             self.batch_norm = None
@@ -26,10 +26,10 @@ class GraphConv(MessagePassing):
         else:
             self.activation = activation"""
             
-        self.linear = nn.Linear(input_dim, output_dim, bias=False)
+        self.linear = nn.Linear(input_dim, output_dim, bias=True)
         
         if edge_input_dim:
-            self.edge_linear = nn.Linear(edge_input_dim, input_dim, bias=False)
+            self.edge_linear = nn.Linear(edge_input_dim, input_dim, bias=True)
         else:
             self.edge_linear = None
 

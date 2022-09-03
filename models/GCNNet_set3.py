@@ -4,10 +4,12 @@ from torch_geometric.nn import GraphNorm ,GCNConv, GATv2Conv, global_mean_pool a
 from import_layers import GCNEdgeConv
 from layers import GraphConv
 
+# Global CONCATENATION
 # Double GCN based model
 class GCNEdgeNet(torch.nn.Module):
     def __init__(self, n_output=1, num_features_xd=69, num_features_xt=33, latent_dim=128, output_dim=128, dropout=0.2, edge_input_dim=None):
         super(GCNEdgeNet, self).__init__()
+        self.latent_dim = latent_dim
         self.n_output = n_output
         self.relu = nn.ReLU()
         self.dropout = nn.Dropout(dropout)
@@ -20,24 +22,23 @@ class GCNEdgeNet(torch.nn.Module):
         self.fc_gd2 = torch.nn.Linear(1024, output_dim)
 
         # protein sequence branch (1d conv)
-        self.tconv1 = GCNConv(num_features_xt, latent_dim, add_self_loops=False) #1024
-        self.tconv2 = GCNConv(latent_dim, latent_dim*2, add_self_loops=False) #512
-        self.tconv3 = GCNConv(latent_dim*2, latent_dim*4, add_self_loops=False) #256
+        self.tconv1 = GCNConv(num_features_xt, latent_dim, add_self_loops=False) #128
+        self.tconv2 = GCNConv(latent_dim*2, latent_dim*2, add_self_loops=False) #256
+        self.tconv3 = GCNConv(latent_dim*2, latent_dim*4, add_self_loops=False) #512
 
         # Global feature branch
         self.glob_linear1 = torch.nn.Linear(num_features_xt, 1024)
         self.glob_linear2 = torch.nn.Linear(1024, 512)
-        self.glob_linear3 = torch.nn.Linear(512, latent_dim*4)
+        self.glob_linear3 = torch.nn.Linear(512, latent_dim)
 
         # Protein refinement phase
-        self.fc_xt1 = nn.Linear(latent_dim*4*2, 1024)
-        self.fc_xt2 = nn.Linear(1024, 512)
-        self.fc_xt3 = nn.Linear(512, output_dim)
+        self.fc_xt1 = nn.Linear(latent_dim*4, 1024)
+        self.fc_xt2 = nn.Linear(1024, output_dim)
 
         # combined layers
         self.fc1 = nn.Linear(2*output_dim, 1024)
         self.fc2 = nn.Linear(1024, 512)
-        self.out = nn.Linear(512, self.n_output)
+        self.out = nn.Linear(512, n_output)
 
         # Norm layers
         self.DGnorm1 = GraphNorm(num_features_xd)
@@ -59,11 +60,10 @@ class GCNEdgeNet(torch.nn.Module):
         x, edge_index, batch, edge_attr = data_mol.x, data_mol.edge_index, data_mol.batch, data_mol.edge_attr
         # get protein input
         target_x, target_edge_index, target_batch, target_x_global = data_prot.x, data_prot.edge_index, data_prot.batch, data_prot.x_global
-    
         x = self.dconv1(x, edge_index, edge_attr)
         #x = self.relu(x)
         x = self.relu(self.DGnorm1(x))
-
+        
         x = self.dconv2(x, edge_index, edge_attr) 
         #x = self.relu(x)
         x = self.relu(self.DGnorm2(x))
@@ -78,13 +78,23 @@ class GCNEdgeNet(torch.nn.Module):
         x = self.relu(x)
         x = self.dropout(x)
         x = self.fc_gd2(x)
-        x = self.relu(x)
         #x = self.dropout(x)
+
+        # Protein Global feature
+        xg = self.glob_linear1(target_x_global)
+        xg = self.batchnorm5(xg)
+        xg = self.relu(xg)
+        xg = self.glob_linear2(xg)
+        xg = self.batchnorm6(xg)
+        xg = self.relu(xg)
+        xg = self.glob_linear3(xg)
+        xg = xg[target_batch]
 
         # target protein
         xt = self.tconv1(target_x, target_edge_index)
         #xt = self.relu(xt)
-        xt = self.relu(self.TGnorm1(xt))
+        xt = self.TGnorm1(xt)
+        xt = torch.cat((xt, xg), 1)
 
         xt = self.tconv2(xt, target_edge_index)
         #xt = self.relu(xt)
@@ -95,24 +105,11 @@ class GCNEdgeNet(torch.nn.Module):
         xt = self.relu(self.TGnorm3(xt))
         xt = gep(xt, target_batch) # global mean pooling
   
-        # Global feature
-        xg = self.glob_linear1(target_x_global)
-        xg = self.batchnorm5(xg)
-        xg = self.relu(xg)
-        xg = self.glob_linear2(xg)
-        xg = self.batchnorm6(xg)
-        xg = self.relu(xg)
-        xg = self.relu(self.glob_linear3(xg))
-
         # flatten
-        xt = torch.cat((xt, xg), 1)
         xt = self.batchnorm2(self.fc_xt1(xt))
         xt = self.relu(xt)
         xt = self.dropout(xt)
-        xt = self.batchnorm7(self.fc_xt2(xt))
-        xt = self.relu(xt)
-        xt = self.fc_xt3(xt)
-        xt = self.relu(xt)
+        xt = self.fc_xt2(xt)
         #xt = self.dropout(xt)
 
         # concat

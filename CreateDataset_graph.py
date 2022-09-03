@@ -53,8 +53,8 @@ class CreateDataset(InMemoryDataset):
             c_size = len(node_feature)
 
             # Extract Protein features from Protein graph (Dictionary)
-            p_size, prot_feature, prot_adj_list = protein_graph[protein]
-                        
+            p_size, prot_feature, prot_adj_list, prot_global_feature = protein_graph[protein]
+        
             GCNData_mol = DATA.Data(x=torch.Tensor(np.array(node_feature)),
                                 edge_attr=torch.Tensor(np.array(edge_feature)),
                                 edge_index=torch.LongTensor(np.array(adj_list)).transpose(1, 0),
@@ -66,6 +66,7 @@ class CreateDataset(InMemoryDataset):
             ################################################################################################## Waiting for protein representation experiment
             GCNData_prot = DATA.Data(x=torch.Tensor(prot_feature), 
                                 edge_index=torch.LongTensor(np.array(prot_adj_list)).transpose(1, 0),
+                                x_global=torch.Tensor(np.array(prot_global_feature)),
                                 y=torch.FloatTensor([label])
                                 )
             GCNData_prot.__setitem__('p_size', torch.LongTensor([p_size]))
