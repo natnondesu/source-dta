@@ -35,12 +35,11 @@ def Edge_Feature(mol):
     # return only edge feature from molecule object
     # Last dim is edge type
     e_feat = mol.edge_feature
-    e_type = np.array(mol.edge_list[:, 2])
+    # e_type = np.array(mol.edge_list[:, 2])
     # edge type one-hot
-    e_hot = np.zeros((len(e_type), 4))
-    e_hot[np.arange(e_type.size),e_type] = 1
-    combine = np.concatenate((e_feat, e_hot), axis=1)
-    return combine
+    # e_hot = np.zeros((len(e_type), 4))
+    # e_hot[np.arange(e_type.size),e_type] = 1
+    return e_feat
 
 def add_self_loop(node_list, edge_list, edge_attr):
     self_edge_index = []
