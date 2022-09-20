@@ -33,9 +33,9 @@ def GET_CONFIG():
 
 
 def GET_MODEL():
-    #model = TransNet(num_features_xd=66, num_features_xt=1280, dropout=0, edge_input_dim=22)
+    #model = TransNet(num_features_xd=66, num_features_xt=1280, dropout=0, edge_input_dim=18)
     #model_st = TransNet.__name__
-    model = GCNEdgeNet(num_features_xd=66, num_features_xt=1280, dropout=0, edge_input_dim=22)
+    model = GCNEdgeNet(num_features_xd=66, num_features_xt=1280, dropout=0, edge_input_dim=18)
     model_st = GCNEdgeNet.__name__
     #model = GCNNet(num_features_xd=78, num_features_xt=1280, dropout=0)
     #model_st = GCNNet.__name__
